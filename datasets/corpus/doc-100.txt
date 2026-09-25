@@ -1,0 +1,3 @@
+topic: python
+A virtual environment isolates project dependencies cleanly.
+A virtual environment isolates project dependencies cleanly. Lists and dictionaries store collections of objects. Python functions accept arguments and return values. A virtual environment isolates project dependencies cleanly. Python functions accept arguments and return values.

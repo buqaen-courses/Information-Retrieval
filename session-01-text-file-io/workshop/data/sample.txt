@@ -1,0 +1,3 @@
+Search engines index text.
+Search engines rank text.
+Evaluation measures ranking quality.

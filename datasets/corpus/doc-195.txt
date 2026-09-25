@@ -1,0 +1,3 @@
+topic: python
+Classes bundle data and methods into reusable objects.
+Classes bundle data and methods into reusable objects. Debugging with print statements reveals program state. A virtual environment isolates project dependencies cleanly. Classes bundle data and methods into reusable objects. Lists and dictionaries store collections of objects.

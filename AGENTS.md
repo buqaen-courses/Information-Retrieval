@@ -18,6 +18,60 @@ samples** in the README, and (2) only then open the workshop. Concretely:
 - If a concept cannot be drawn or shown with a tiny sample, simplify it until it can. Push depth
   into `appendix-optional.md` (e.g., OS internals in Session 2).
 
+## Agent role — Chief IR teacher (applies to every session creation)
+
+For every session you create, act as a **Chief IR teacher** designing a full,
+detailed lesson that goes **from easy to hard**:
+
+- README teaches exhaustively but simply: every concept gets visuals first —
+  many concrete samples, images, and charts (not one token diagram). Order
+  content easy → hard; never assume prior knowledge beyond earlier sessions.
+- Workshop is a **full step-by-step guide**: numbered steps, exact commands,
+  exact files to open/edit, what success looks like after each step.
+- **Course venv is mandatory.** Create it once at repo root (`.venv`), install
+  `requirements.txt` into it, and RUN every step in it: every
+  `images/make_images.py`, every starter, every solution/test. Never claim
+  output without executing in the venv.
+- Every session README must contain a short **venv reminder** (activate the
+  course venv; one-time create/install lives in the main `README.md`, never
+  repeated per session). All workshop commands assume the venv is active and
+  use plain `python ...` — never a hardcoded venv-python path.
+- **Actual outputs only.** Every worked example, benchmark number, chart, and
+  "Expected output" block must be pasted from a real venv run — never invented.
+- **Assume basic Python only.** The student knows variables, loops, functions —
+  nothing more. Every new stdlib/library call gets a one-line plain explanation
+  at first use. After the first sample that uses a call like `open()`, show its
+  popular parameter values (e.g. modes `"r"`, `"w"`, `"a"`, `encoding="utf-8"`)
+  with what each does, AND explain what actually happens under the hood when the
+   call runs (e.g. `open()` asks the OS for a handle, creates a buffered file
+   object — no disk data moves until you read/write).
+- **Match code to the student's level — Session 1 is open-and-iterate only.**
+  Early sessions use only constructs taught so far: `open()`, `for` loops,
+  plain `dict`/`list`, `sorted()`. Library shortcuts (`pathlib` one-liners,
+  `Counter`, `lambda`, regex) are banned until the session that teaches them.
+  Concretely, Session 1 opens a text file and iterates line by line to find
+  and count — no `read_text()`, no `Counter`, no `maketrans`.
+- **Workshops are self-explanatory.** WORKSHOP.md + starter files must be
+  comprehensive on their own: embed the relevant sample file lines AND the
+  required Python snippets inline in each task, so a student can complete the
+  task without hunting through other files. A task never says just "fix the
+  code" — it shows the input lines, the snippet shape, and the expected lines.
+- **Empty-file-first workshops.** Every workshop must be completable starting
+  from an empty `.py` file: each stop's snippet adds to the file, and running
+  the file after each stop prints the exact intermediate result shown in the
+  tutorial. The `starter/` TODO file is a convenience shortcut — never the only
+  path. After writing a workshop, audit it by replaying the stops from an empty
+  file in the venv and diffing every checkpoint output against the tutorial.
+- **Every workshop reads like a Medium article.** WORKSHOP.md is a step-by-step
+  self-learning journey, not a task ticket: a hook opening (why this matters),
+  a "what you will walk away with" line, a narrative journey with numbered
+  stops (each ending in a visible checkpoint: a command + its output), short
+  "what you just learned" recaps, and a closing (what you built + where it
+  leads next). Same contract underneath — exact commands, inline samples and
+  snippets, TODOs ≤ 8, real Expected output, timing ≤ 45 min — but written so
+  a student alone at midnight can follow it start to finish. This applies to
+  all 25 sessions, no exceptions.
+
 ## Repository layout (create exactly this)
 
 ```
@@ -67,6 +121,10 @@ Repeat per concept. Every session has 3–6 concepts.
 ## Worked example
 Tiny complete snippet + its printed output in a fenced block.
 
+## Environment (venv)
+One-paragraph reminder: activate the course venv (setup in main README).
+All commands assume it is active.
+
 ## How this connects to the workshop
 2–3 sentences bridging README → workshop tasks.
 
@@ -84,15 +142,19 @@ Tiny complete snippet + its printed output in a fenced block.
 
 ```markdown
 # Workshop NN — Title (≈45 min)
+Hook opening (why this matters) + what you will walk away with.
 
 ## Setup
-Exact commands to run from this folder.
+Exact commands to run from this folder (venv assumed active, plain `python`).
 
-## Tasks
-### Task 1 — <goal> (≈10 min)
+## The journey (numbered stops, each ends in a checkpoint: command + output)
+### Stop 1 — <goal> (≈10 min)
+Narrative + the exact sample-file lines + the Python snippet shape
+(new call explained + popular parameter values at first use). Then:
 Open `starter/x.py`. Replace TODO-1 … TODO-n. Hint: <one-liner>.
-### Task 2 …
-(2–4 tasks; each maps to README concepts; total TODOs ≤ 8)
+Checkpoint: <command + its real output>. Recap: <one line on what you learned>.
+### Stop 2 …
+(2–4 stops; each maps to README concepts; total TODOs ≤ 8)
 
 ## Expected output
 Exact (seeded, reproducible) sample output the correct solution prints.
@@ -103,6 +165,9 @@ Marked clearly as beyond the core deliverable.
 ## Solution
 `solution/` — attempt first. Includes a sanity check:
 `python solution/x.py` or `pytest solution/` that passes.
+
+## Where this leads
+What you built + which session uses it next.
 ```
 
 ## Image generation rules
@@ -143,8 +208,8 @@ Serve via `python -m http.server`; document this in its README.
 
 Generate in order: `tools/` → `setup/` → `datasets/` (run `make_corpus.py`, commit outputs) →
 sessions 01→25 sequentially. After each session:
-1. Run `images/make_images.py` — must succeed and produce all PNGs.
-2. Run the solution's tests/sanity script — must pass.
+1. Run `images/make_images.py` **in the course venv** — must succeed and produce all PNGs.
+2. Run the solution's tests/sanity script **in the course venv** — must pass.
 3. Verify every README image link resolves and every TODO in starter/ has a matching solution line.
 4. Verify README quiz answers are correct and the worked example output matches actual execution.
 
@@ -153,8 +218,10 @@ Do not start session N+1 until session N is fully validated.
 ## Definition of done (per session, all must hold)
 
 - [ ] README teaches every syllabus concept visual-first; worked example output is real
+- [ ] README contains venv reminder; every step was run in the course venv
 - [ ] All images exist, are referenced, and regenerate deterministically
 - [ ] Workshop tasks only exercise README concepts; TODOs ≤ 8; expected output documented
+- [ ] Empty-file replay audited: stops rebuilt from an empty file match every checkpoint output
 - [ ] Starter runs; solution passes tests; stretch goals marked optional
 - [ ] Timing blocks in WORKSHOP.md sum ≤ 45 min; no network required at runtime
 - [ ] Content tone: respectful crawling, clear ethics notes in S17–S19

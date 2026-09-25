@@ -1,0 +1,3 @@
+topic: python
+The requests library downloads web pages with one call.
+The requests library downloads web pages with one call. A virtual environment isolates project dependencies cleanly. Lists and dictionaries store collections of objects. A virtual environment isolates project dependencies cleanly. A virtual environment isolates project dependencies cleanly.

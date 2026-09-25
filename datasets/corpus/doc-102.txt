@@ -1,0 +1,3 @@
+topic: python
+Classes bundle data and methods into reusable objects.
+Classes bundle data and methods into reusable objects. Python functions accept arguments and return values. Classes bundle data and methods into reusable objects. Debugging with print statements reveals program state. Lists and dictionaries store collections of objects.

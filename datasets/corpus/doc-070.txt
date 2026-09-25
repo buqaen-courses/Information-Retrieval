@@ -1,0 +1,3 @@
+topic: python
+A virtual environment isolates project dependencies cleanly.
+A virtual environment isolates project dependencies cleanly. Classes bundle data and methods into reusable objects. Python functions accept arguments and return values.

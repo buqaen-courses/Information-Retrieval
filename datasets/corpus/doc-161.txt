@@ -1,0 +1,3 @@
+topic: python
+Lists and dictionaries store collections of objects.
+Lists and dictionaries store collections of objects. The requests library downloads web pages with one call. Classes bundle data and methods into reusable objects. Lists and dictionaries store collections of objects.

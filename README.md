@@ -10,6 +10,26 @@ end-to-end demo + capstone.
 **Pedagogical rule:** teach, then practice — never mix. Read the session `README.md` first
 (visuals + tiny worked example), then open `workshop/WORKSHOP.md` and code.
 
+## Environment setup (do once)
+
+```powershell
+# Windows (PowerShell), from the repo root:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+```bash
+# macOS / Linux, from the repo root:
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Activate the venv every time you sit down to study (same `Activate.ps1` /
+`source` line — creating and installing happen only once). With the venv active,
+every command in this course is plain `python ...`, from any session folder.
+
 ## How to use this repo
 
 1. Start at `setup/` — Session-0 prework: Python venv, Docker for OpenSearch, pre-cache models.
