@@ -271,6 +271,24 @@ These stay byte-identical to the English source, because a student runs them:
 - **Technical terms:** give the Persian term and the English original in parentheses on first
   use per concept (e.g. «نمایه‌ی معکوس (inverted index)»). Use the English in parentheses
   thereafter when it is the term students will meet in code or in an error message.
+- **No unexplained jargon, ever.** A Persian reader must be able to understand the sentence
+  from the sentence itself, using only ordinary Persian. Translating a term literally is not
+  enough when the literal Persian word is specialist jargon or an anglicism the reader will
+  not recognise. In that case, either use the ordinary Persian word, or explain the term in
+  plain language on first use and keep the Persian term afterwards.
+
+  Worked example, taken from Session 1. The English says "the handle leaks". A first pass
+  translated that as «دستگیره نشت می‌کند», which is neither natural Persian nor meaningful
+  to a reader who does not already know the term: *نشت* on its own carries none of the
+  meaning. The fix explains what actually happens, in plain Persian:
+
+  > وقتی پایتون فایلی را باز می‌کند، سیستم‌عامل یک متغیر برای آن باز می‌کند و آن را در
+  > فهرست فایل‌های باز نگه می‌دارد؛ به این متغیر **دستگیره** (handle) می‌گوییم. اگر بسته
+  > نشود، سیستم‌عامل فکر می‌کند هنوز داریم از آن فایل استفاده می‌کنیم و اجازه نمی‌دهد کسی
+  > دیگر باز یا حذفش کند. به این وضعیت **نشتی فایل** (file handle leak) می‌گوییم.
+
+  So: **دستگیره** on its own is fine, because the text has told the reader what it is.
+  **نشت** on its own was not, because nothing had told the reader what it meant.
 - **ZWNJ (نیم‌فاصله, U+200C)** is mandatory: می‌شود، نمایه‌ها، به‌ازای، نیم‌فاصله.
 - **Persian characters only**: ی U+06CC, ک U+06A9 — never ي or ك. Never ٤٥٦.
 - **Persian digits in prose** (۱۲۳۴۵۶۷۸۹، «۴۵ دقیقه»، «۲۰ درصد»); **Latin digits inside code
