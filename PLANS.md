@@ -4,7 +4,7 @@ Single source of truth for "what is left". Written for a future agent (or a
 future you) picking this up cold. Update it **in the same commit** as any work
 that changes the plan.
 
-Last updated: after Session 10 (evaluation) was completed and pushed.
+Last updated: after Session 2 workshop update was completed and pushed.
 
 ---
 
@@ -15,6 +15,7 @@ Last updated: after Session 10 (evaluation) was completed and pushed.
 | `setup/` infrastructure | **done** — mock shop (128 products), `check_env.py`, `download_models.py`, docker compose, bundled `search_server.py` |
 | course venv + dependencies | **done** — Python 3.14, all packages installed and verified |
 | Session 01–10 | **done** — README, images, WORKSHOP, starter, solution, tests; all validated in the venv |
+| Session 02 workshop | **updated** — 4 data files in workshop/data/, 10k fake profiles, serialization section, record ops (update/delete/insert), workshop_test.py replaces solution/ |
 | Session 11 | **partial** — `workshop/solution/fast_score.py` + `test_fast_score.py` written and passing; **missing** README, WORKSHOP, images, starter |
 | Session 12–25 | **not started** — placeholder `.gitkeep` dirs only |
 | Persian translations | **not started** |
