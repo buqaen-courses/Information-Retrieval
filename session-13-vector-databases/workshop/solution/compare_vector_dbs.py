@@ -26,6 +26,25 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+
+
+def _protect_datasets_namespace() -> None:
+    """Stop the repo's `datasets/` folder shadowing HuggingFace `datasets`.
+
+    Our data folder has no __init__.py, so if the repo root is on sys.path
+    Python can treat it as a *namespace package* named `datasets`. LanceDB's
+    optional HF-datasets support then does `from datasets import Dataset`, finds
+    the namespace package (which has no Dataset), and raises ImportError. The
+    course venv installs the real `datasets` package for exactly this reason;
+    this helper additionally drops any namespace `datasets` already imported,
+    so the collision cannot survive even on a fresh checkout.
+    """
+    mod = sys.modules.get("datasets")
+    if mod is not None and getattr(mod, "__file__", None) is None:
+        del sys.modules["datasets"]
+
+
+_protect_datasets_namespace()
 OUT_DIR = HERE / "vectors"
 PRODUCTS_JSON = ROOT / "datasets" / "fallback_products.json"
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"

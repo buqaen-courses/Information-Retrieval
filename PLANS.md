@@ -121,6 +121,19 @@ respecting the dependency rules above:
 
 - Invoke Python as `& "F:\Courses\Buqaen\Information Retrieval\.venv\Scripts\python.exe" <script>`
   with `workdir` set to the repo root. Never hardcode the venv path into course files.
+- **`datasets/` shadows the HuggingFace `datasets` package.** The repo folder has no
+  `__init__.py`, so Python treats it as a *namespace package*. LanceDB does
+  `from datasets import Dataset`, finds the namespace package instead, and raises
+  ImportError. Any test that imports LanceDB needs a `conftest.py` that removes the
+  repo root from the front of `sys.path`. Session 13 has one — copy that pattern.
+- **Milvus Lite needs a manual install on Python 3.14.** `pymilvus[milvus_lite]` fails
+  to resolve; the working command is
+  `pip install --only-binary=:all: --no-deps milvus-lite`. Keep it in `requirements.txt`.
+- **Milvus Lite writes a directory, not a file.** `milvus_lite.db` is a folder holding
+  `collections/`, `wal/` and `schema.json`. Measure it by summing files, and expect
+  `PermissionError` on Windows when a previous handle still holds it.
+- The two databases report **different metrics**: Milvus gives `distance` (cosine),
+  LanceDB gives `_distance` (squared L2). For length-1 vectors `cos = (2 - d²)/2`.
 - `requirements.txt` is pinned to what actually builds on Python 3.14, which is
   **not** the original pin list in `SYLLABUS.md`. Do not "restore" the old pins.
 - Docker Hub rate-limits this machine (403). The compose file takes an
