@@ -1,0 +1,6 @@
+python functions return values
+the striker scored twice in the second half
+python lists and dictionaries store objects
+simmer the tomato sauce slowly
+python dictionaries store collections of objects
+chop fresh basil into the pasta

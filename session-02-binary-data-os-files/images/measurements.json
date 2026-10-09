@@ -1,0 +1,42 @@
+{
+  "n_records": 12,
+  "sizes_workshop": {
+    "csv": 1050,
+    "json": 2101,
+    "ndjson": 1774,
+    "pickle": 1321
+  },
+  "load_ms_workshop": {
+    "csv": 0.2027,
+    "json": 0.1661,
+    "ndjson": 0.2323,
+    "pickle": 0.1449
+  },
+  "load_ms_workshop_median": {
+    "csv": 0.2031,
+    "json": 0.1617,
+    "ndjson": 0.225,
+    "pickle": 0.1395
+  },
+  "n_products": 128,
+  "sizes_fallback": {
+    "csv": 16742,
+    "json": 28229,
+    "ndjson": 24770,
+    "pickle": 19742
+  },
+  "load_ms_fallback": {
+    "csv": 0.773,
+    "json": 0.4937,
+    "ndjson": 0.9516,
+    "pickle": 0.2104
+  },
+  "buffered_ms": 0.614,
+  "unbuffered_ms": 8.789,
+  "speedup": 14.3,
+  "write_bytes": 128000,
+  "syscalls_buffered": 16,
+  "syscalls_unbuffered": 2000,
+  "read_many_ms": null,
+  "read_one_ms": null
+}

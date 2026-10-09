@@ -1,0 +1,3 @@
+topic: python
+Python functions return values.
+Lists and dictionaries store objects.

@@ -1,0 +1,3 @@
+topic: football
+The striker scored twice.
+The goalkeeper saved a shot.

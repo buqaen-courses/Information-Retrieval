@@ -1,0 +1,3 @@
+topic: python
+Python lists and dictionaries store objects.
+A virtual environment isolates dependencies.

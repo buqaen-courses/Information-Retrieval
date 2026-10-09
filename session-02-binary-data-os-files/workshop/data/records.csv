@@ -1,0 +1,13 @@
+id,name,price,category,description
+p-001,Desk Lamp,19.99,lighting,"Warm LED desk lamp, brushed steel, 3-year warranty"
+p-002,Office Chair,249.00,furniture,"Ergonomic mesh chair with lumbar support and 5 casters"
+p-003,USB-C Cable,8.50,electronics,"Braided 2m USB-C cable, 100W charging, fits any port"
+p-004,Standing Desk Mat,45.00,furniture,"Anti-fatigue standing desk mat, 90x50cm"
+p-005,Ceramic Mug,6.75,kitchen,"Stoneware mug, 350ml, dishwasher safe"
+p-006,Monitor Arm,89.99,electronics,"Single monitor arm, holds up to 27 inches, VESA"
+p-007,Bookshelf,129.00,furniture,"Five-shelf birch bookshelf, 180cm tall"
+p-008,Wireless Mouse,34.99,electronics,"Silent-click wireless mouse, USB-C rechargeable"
+p-009,Desk Organizer,15.00,office,"Walnut desk organizer with pen tray and card slots"
+p-010,Table Lamp,39.99,lighting,"Adjustable brass table lamp with warm white bulb"
+p-011,Notebook A5,7.25,office,"Dot-grid A5 notebook, 192 pages, lies flat"
+p-012,"Cable, 3-pack",11.00,electronics,"Three braided cables, 1m each, mixed lengths, spare"
