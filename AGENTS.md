@@ -290,14 +290,28 @@ A straight translation is a draft, not a deliverable. For each translated file:
 2. Make it sound like a teacher who wrote it in Persian the first time, while keeping every
    technical claim and every number exactly as in the English source.
 3. Vary sentence length and structure. Uniform 15–20-word sentences are the clearest tell.
-4. Run the skill's checkers on each file, from the repo root:
+4. Run the skill's checkers on each file, from the repo root. **Use `--check`
+   only, never `--edit`:**
+
    ```
-   python "C:\Users\Darya-PC\.agents\skills\persian-writing\scripts\persian_cleanup.py" --edit --in <file> --out <file>
    python "C:\Users\Darya-PC\.agents\skills\persian-writing\scripts\fa_lint.py" --check <file>
    ```
-   Fix what the linter reports, and fix by hand what needs judgment (dashes, register, هکسره).
-5. Confirm the code blocks came through unchanged: the translated file must contain the same
-   fenced blocks as the English one.
+
+   `persian_cleanup.py --edit` **must not be run on these files.** It rewrites
+   text inside code spans and inline code — it turned `encoding="utf-8"` into
+   `encoding=«utf-۸»`, `"r"` into `«r»`, and `...` into `…`. That silently
+   breaks every command on the page. Fix what the linter reports by hand, and
+   ignore its two known false positives:
+   - standard names like `UTF-8` that contain Latin digits,
+   - straight quotes that sit inside code spans.
+5. Confirm the code blocks came through unchanged — run the repo's own parity
+   checker, which is the authority on this:
+
+   ```
+   python tools/check_code_parity.py session-01-.../README.md session-01-.../README_fa.md
+   ```
+
+   It must print `all code preserved`. Fix every mismatch before committing.
 
 ## Definition of done (per session, all must hold)
 
