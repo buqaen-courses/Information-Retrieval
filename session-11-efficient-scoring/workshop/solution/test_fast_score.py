@@ -145,13 +145,20 @@ def test_build_blocks_records_maximum() -> None:
 
 
 def test_block_max_wand_finds_the_concatenation() -> None:
-    """With one term only, WAND must return that term's documents."""
+    """With one term, WAND must return that term's documents, best-first.
+
+    Note the demo scores each document by its block maximum, so documents
+    sharing a block tie. It returns every document, ranked by that block score.
+    """
     values = [1, 3, 5, 7]
     scores = [0.5, 1.5, 0.25, 2.0]
     blocks = build_blocks(values, scores, block_size=2)
     blocks_by_term = {"a": blocks}
     hits = block_max_wand(blocks_by_term, ["a"], threshold=0.0, top_k=10)
-    assert [h[0] for h in hits] == ["1", "3", "5", "7"]
+    got = {h[0] for h in hits}
+    assert got == {"1", "3", "5", "7"}
+    # the block holding 5 and 7 has the higher max, so it must come first
+    assert [h[0] for h in hits[:2]] == ["5", "7"]
 
 
 def test_block_max_wand_threshold_prunes() -> None:
@@ -164,6 +171,20 @@ def test_block_max_wand_threshold_prunes() -> None:
     pruned = block_max_wand(blocks_by_term, ["a"], threshold=10.0, top_k=99)
     assert len(everything) == 6
     assert pruned == []
+
+
+def test_block_max_wand_requires_all_terms() -> None:
+    """Two-term WAND returns only docs present in BOTH lists.
+
+    a has {5, 9}, b has {5, 7}. Only 5 is in both, so only 5 is returned even
+    though 9 and 7 are in one list each. This is what "full match" means in
+    block-max WAND.
+    """
+    blocks_a = build_blocks([5, 9], [1.0, 2.0], block_size=2)
+    blocks_b = build_blocks([5, 7], [1.5, 0.5], block_size=2)
+    hits = block_max_wand({"a": blocks_a, "b": blocks_b}, ["a", "b"],
+                          threshold=0.0, top_k=10)
+    assert [h[0] for h in hits] == ["5"]
 
 
 def test_block_size_constant() -> None:

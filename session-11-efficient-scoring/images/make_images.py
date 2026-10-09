@@ -8,6 +8,7 @@ inside this script. Nothing is typed in by hand.
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -150,13 +151,24 @@ def varint_growth() -> None:
 
 
 def comparisons_versus_time() -> None:
-    """11-04: the honest result — fewer comparisons, but not faster in Python."""
+    """11-04: the honest result — fewer comparisons, but not faster in Python.
+
+    Wall-clock timings come from images/measurements.json (written by
+    images/measure.py) so this chart is deterministic: running make_images.py
+    twice produces byte-identical output, which a live timing would break.
+    Comparison counts are recomputed here because they are deterministic.
+    """
     apply_style()
     postings, _ = build_postings(CORPUS)
     a, b = postings["topic"], postings["the"]
     plain_cmp = count_comparisons_plain(a, b)
     skip_cmp = count_comparisons_skips(a, b)
     ratio = plain_cmp / max(1, skip_cmp)
+
+    with open(HERE / "measurements.json", encoding="utf-8") as f:
+        measured = json.load(f)
+    plain_ms = measured["plain"]["milliseconds"]
+    skip_ms = measured["skips"]["milliseconds"]
 
     fig, (axl, axr) = plt.subplots(1, 2, figsize=(11, 4.4))
     fig.subplots_adjust(left=0.07, right=0.98, top=0.84, bottom=0.18, wspace=0.34)
@@ -177,28 +189,15 @@ def comparisons_versus_time() -> None:
                  arrowprops=dict(arrowstyle="->", color=COLORS["ok"], lw=1.6),
                  fontsize=11, weight="bold", color=COLORS["ok"])
 
-    import time
-
-    def best(fn, repeat=7):
-        out = float("inf")
-        for _ in range(repeat):
-            t0 = time.perf_counter()
-            fn()
-            out = min(out, time.perf_counter() - t0)
-        return out
-
-    from fast_score import intersect_plain, intersect_with_skips
-    plain_s = best(lambda: intersect_plain(a, b))
-    skip_s = best(lambda: intersect_with_skips(a, b))
-    axr.bar([0, 1], [plain_s * 1000, skip_s * 1000],
+    axr.bar([0, 1], [plain_ms, skip_ms],
             color=[COLORS["neutral"], COLORS["warn"]], width=0.5)
     axr.set_xticks([0, 1])
     axr.set_xticklabels(labels, fontsize=8.5)
     axr.set_ylabel("milliseconds")
     axr.set_title("Wall-clock in pure Python", fontsize=11)
-    for i, v in enumerate([plain_s * 1000, skip_s * 1000]):
-        axr.text(i, v + 0.01, f"{v:.3f} ms", ha="center", fontsize=9)
-    axr.set_ylim(0, max(plain_s, skip_s) * 1000 * 1.35)
+    for i, v in enumerate([plain_ms, skip_ms]):
+        axr.text(i, v + 0.005, f"{v:.3f} ms", ha="center", fontsize=9)
+    axr.set_ylim(0, max(plain_ms, skip_ms) * 1.35)
     axr.text(0.5, 0.97,
              "SLOWER — `x in list` is already\na tight C loop in CPython.\n"
              "Skip pointers pay off in engines\nwith millions of postings.",
@@ -212,8 +211,7 @@ def comparisons_versus_time() -> None:
     fig.savefig(HERE / "11-04-comparisons-vs-time.png")
     plt.close(fig)
     print(f"11-04 measured: comparisons plain={plain_cmp} skips={skip_cmp} "
-          f"({ratio:.2f}x); time plain={plain_s * 1000:.3f}ms "
-          f"skips={skip_s * 1000:.3f}ms")
+          f"({ratio:.2f}x); time plain={plain_ms}ms skips={skip_ms}ms")
 
 
 def main() -> None:

@@ -189,9 +189,15 @@ def main():
     args = sys.argv[1:]
     folder = args[0] if args else "../../datasets/corpus"
     postings, doc_ids = build_postings(folder)
+    sample = postings[sorted(postings)[0]][:20]
     try:
-        sample = postings[sorted(postings)[0]][:20]
-        packed = compress_postings(sample)
+        # surface the EARLIEST unfinished TODO, not whichever one the call
+        # order happens to reach first
+        delta_encode(sample)                       # TODO-1
+        delta_decode(delta_encode(sample))         # TODO-2
+        varint_encode(1)                            # TODO-3
+        varint_decode(varint_encode(1))             # TODO-4
+        packed = compress_postings(sample)          # TODO-5 and TODO-6
         restored = decompress_postings(packed)
     except NotImplementedError as exc:
         print(exc)

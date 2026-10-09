@@ -227,55 +227,69 @@ def block_max_wand(blocks_by_term: dict[str, list[dict]], query_terms: list[str]
                    threshold: float, top_k: int = 10) -> list[tuple[str, float]]:
     """Block-max WAND demonstration.
 
-    Terminators are sorted by their block max. We repeatedly take the term with
-    the largest current block max as pivot, advance the other lists to the
-    pivot's document, and stop as soon as even the largest remaining block max
-    cannot reach the threshold. This is the pruning idea; the production
-    version adds pivot ordering and dynamic thresholding.
+    Each postings list is cut into blocks that remember the best score any
+    document inside them could produce. We walk the lists in lockstep and stop
+    as soon as the largest block maximum still available is below the
+    threshold: past that point no unseen document can qualify, so the rest of
+    the index is skipped without being touched.
+
+    Teaching version: it keeps the pruning idea and the termination rule, and
+    drops the pivot ordering and dynamic thresholding a production engine adds.
     """
-    cursors = {t: 0 for t in query_terms}
-    candidates: dict[str, float] = defaultdict(float)
-    scored = 0
+    # position of the next unprocessed document in each block
+    cursor = {t: 0 for t in query_terms}          # index inside the current block
+    block = {t: 0 for t in query_terms}          # index of the current block
+    scored: dict[int, float] = {}
 
     while True:
-        # pick the pivot: the list sitting at the largest block max
-        pivot_term = None
-        pivot_score = -1.0
+        # 1. if any list is exhausted we are done
+        done = False
         for term in query_terms:
-            blocks = blocks_by_term[term]
-            i = cursors[term]
-            if i < len(blocks) and blocks[i]["max_score"] > pivot_score:
-                pivot_score = blocks[i]["max_score"]
-                pivot_term = term
-        if pivot_term is None:
+            if block[term] >= len(blocks_by_term[term]):
+                done = True
+        if done:
             break
-        # every remaining block max is below the threshold -> safe to stop
-        if pivot_score < threshold:
-            break
-        pivot_doc = blocks_by_term[pivot_term][cursors[pivot_term]]["docs"][0]
-        full = True
-        for term in query_terms:
-            blocks = blocks_by_term[term]
-            i = cursors[term]
-            while i < len(blocks) and blocks[i]["end"] <= pivot_doc:
-                i += 1
-            cursors[term] = i
-            if i >= len(blocks) or blocks[i]["docs"][0] > pivot_doc:
-                full = False
-                break
-        if not full:
-            continue
-        # all lists cover pivot_doc: score it and move past
-        total = 0.0
-        for term in query_terms:
-            block = blocks_by_term[term][cursors[term]]
-            if pivot_doc in block["docs"]:
-                total += block["max_score"]
-        candidates[pivot_doc] = total
-        scored += 1
 
-    ranked = sorted(candidates.items(), key=lambda kv: (-kv[1], str(kv[0])))
-    return [(str(d), s) for d, s in ranked[:top_k]]
+        # 2. prune using the best score still reachable in each list
+        best_remaining = 0.0
+        for term in query_terms:
+            b = blocks_by_term[term][block[term]]
+            remaining = b["max_score"]
+            best_remaining = max(best_remaining, remaining)
+        if best_remaining < threshold:
+            break
+
+        # 3. the next candidate is the smallest document still in front of us
+        pivot = None
+        for term in query_terms:
+            b = blocks_by_term[term][block[term]]
+            doc = b["docs"][cursor[term]]
+            pivot = doc if pivot is None else min(pivot, doc)
+
+        # 4. every list must actually contain the pivot to be scored
+        total = 0.0
+        matched = True
+        for term in query_terms:
+            b = blocks_by_term[term][block[term]]
+            if pivot in b["docs"]:
+                total += b["max_score"]
+            else:
+                matched = False
+        if matched:
+            scored[pivot] = total
+
+        # 5. consume the pivot in every list, rolling into the next block when
+        #    the current one is used up
+        for term in query_terms:
+            b = blocks_by_term[term][block[term]]
+            if pivot in b["docs"]:
+                cursor[term] = b["docs"].index(pivot) + 1
+            if cursor[term] >= len(b["docs"]):
+                block[term] += 1
+                cursor[term] = 0
+
+    ranked = sorted(scored.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [(str(doc), score) for doc, score in ranked[:top_k]]
 
 
 # --------------------------------------------------------------------------- #

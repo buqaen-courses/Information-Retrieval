@@ -1,0 +1,13 @@
+{
+  "query": "topic the",
+  "hits": 145,
+  "plain": {
+    "milliseconds": 0.149,
+    "comparisons": 14474
+  },
+  "skips": {
+    "interval": 32,
+    "milliseconds": 0.55,
+    "comparisons": 2320
+  }
+}
