@@ -278,6 +278,10 @@ These stay byte-identical to the English source, because a student runs them:
 - **Punctuation**: ، ؛ ؟ and «گیومه». No em dashes anywhere in Persian prose.
 - **No AI tells:** no «در دنیای امروز», no «نقش بسزایی», no rule-of-three triads, no
   «در نهایت می‌توان گفت», no tacked-on «که نشان‌دهنده‌ی ... است».
+- **Titles use the plural «ما» form.** The learning-objectives heading is
+  «در این نشست چه می‌آموزیم» (we learn), never «چه می‌آموزی». The same applies to
+  any other section title: prefer «ما» (می‌آموزیم، می‌سازیم، می‌بینیم) over «تو» in
+  headings.
 - Keep headings **level-for-level** identical to the English source so the two documents can be
   diffed and cross-linked.
 
