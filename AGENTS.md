@@ -296,10 +296,18 @@ These stay byte-identical to the English source, because a student runs them:
 - **Punctuation**: ، ؛ ؟ and «گیومه». No em dashes anywhere in Persian prose.
 - **No AI tells:** no «در دنیای امروز», no «نقش بسزایی», no rule-of-three triads, no
   «در نهایت می‌توان گفت», no tacked-on «که نشان‌دهنده‌ی ... است».
-- **Titles use the plural «ما» form.** The learning-objectives heading is
-  «در این نشست چه می‌آموزیم» (we learn), never «چه می‌آموزی». The same applies to
-  any other section title: prefer «ما» (می‌آموزیم، می‌سازیم، می‌بینیم) over «تو» in
-  headings.
+- **Titles use the plural «ما» form — every heading, not just the objectives line.**
+  The learning-objectives heading is «در این نشست چه می‌آموزیم» (we learn), never
+  «چه می‌آموزی». The same applies to EVERY other heading: no heading may address a
+  single reader with a bare second-person form. So
+  - `### 01.1 Where are you: the IR pipeline` → `### ۰۱.۱ کجای مسیر هستیم: خط لوله‌ی IR`
+  - `### Stop 1 — Open the file and count everything` → `### ایستگاه ۱ — فایل را باز کنیم و همه‌چیز را بشماریم`
+  - `## Meet your patient` → `## بیمارت را بشناسیم`
+  - `## Further reading, if you want` → `## منابعی برای ادامه، اگر خواستید`
+  In body prose you may still address the reader as «می‌خوانی» / «ببین»; the plural
+  requirement is about headings, where the course speaks as "we" to the class.
+- Headings with no subject verb (for example «این کار به کجا می‌رسد») are already
+  neutral and need no change.
 - Keep headings **level-for-level** identical to the English source so the two documents can be
   diffed and cross-linked.
 
