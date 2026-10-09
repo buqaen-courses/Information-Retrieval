@@ -1,7 +1,8 @@
 # AGENTS.md — Course Material Generation Instructions
 
 You are generating all materials for a 25-session workshop course on Information Retrieval.
-`SYLLABUS.md` is the source of truth for content. This file defines **how** to generate it.
+`SYLLABUS.md` is the source of truth for content. `PLANS.md` is the source of truth for
+**what is left to build**. This file defines **how** to generate it.
 
 ## Non-negotiable pedagogical rule (read first)
 
@@ -209,11 +210,94 @@ Serve via `python -m http.server`; document this in its README.
 Generate in order: `tools/` → `setup/` → `datasets/` (run `make_corpus.py`, commit outputs) →
 sessions 01→25 sequentially. After each session:
 1. Run `images/make_images.py` **in the course venv** — must succeed and produce all PNGs.
-2. Run the solution's tests/sanity script **in the course venv** — must pass.
+2. Run the solution's tests/sanity script **in the venv** — must pass.
 3. Verify every README image link resolves and every TODO in starter/ has a matching solution line.
 4. Verify README quiz answers are correct and the worked example output matches actual execution.
 
 Do not start session N+1 until session N is fully validated.
+
+## Planning rule (read this before building anything)
+
+`PLANS.md` at the repo root is the **resumable state of this repository**. It exists so that
+work can stop and resume without losing context.
+
+- Before starting work, **read `PLANS.md` first**. It records what is done, what is next, and
+  the order of remaining sessions.
+- Update `PLANS.md` in the **same commit** as any work that changes the plan: a session
+  completed, an order changed, a decision recorded.
+- `PLANS.md` must also carry any **deliberate findings that look like bugs** (e.g. a benchmark
+  where the optimization is genuinely slower, or a metric that saturates) so a future agent
+  does not "fix" them. These are teaching material — explain them, do not delete them.
+- One session per commit. Never batch many sessions into one commit.
+
+## Persian translation rule (every `*.md` ships with a `*_fa.md`)
+
+Every Markdown file that ships to students must have a Persian translation beside it,
+committed in the same commit as the file itself:
+
+```
+session-08-bm25/README.md          session-08-bm25/README_fa.md
+session-08-bm25/workshop/WORKSHOP.md   session-08-bm25/workshop/WORKSHOP_fa.md
+```
+
+Naming: insert `_fa` **before** the extension. It applies to `README.md`, `workshop/WORKSHOP.md`,
+`appendix-optional.md`, `workshop/data/*.md`, and the root docs (`README.md` → `README_fa.md`,
+`TOC.md` → `TOC_fa.md`, `SYLLABUS.md` → `SYLLABUS_fa.md`, `setup/README.md` → `setup/README_fa.md`).
+
+### What must NOT be translated
+
+These stay byte-identical to the English source, because a student runs them:
+
+- **All fenced code blocks**, including Python, shell, and file trees.
+- **Inline code** (` `k1` `) and code spans inside prose.
+- **Commands and paths**, exactly: `python workshop/starter/bm25.py`, `../../datasets/corpus`.
+- **Output blocks** — the `Actual output (pasted from a real venv run):` fences stay Latin, including
+  their digits, so a student can diff their terminal against the page.
+- **Image links** (`images/07-01-cosine-angle.png`) and every link target.
+- **Formulas** (math, code blocks with expressions), and metric/file names.
+
+### What must be translated
+
+- All prose: headings, explanations, analogies, hints, recaps, quiz questions **and** the answers
+  inside `<details>` tags, the hook lines, "what you will walk away with", stretch goals.
+- Table **headers and Persian-side cells**; numeric results inside tables may stay Latin so they
+  match the code output beside them.
+- Front-matter prose lines such as "(≈45 min)" → "(حدود ۴۵ دقیقه)".
+
+### Language rules
+
+- **Register:** instructional-technical Persian, written forms (می‌شود, not میشه), zero slang,
+  no English filler words. Address the reader as implicitly («می‌خوانی», «ببین») — do not repeat شما.
+- **Technical terms:** give the Persian term and the English original in parentheses on first
+  use per concept (e.g. «نمایه‌ی معکوس (inverted index)»). Use the English in parentheses
+  thereafter when it is the term students will meet in code or in an error message.
+- **ZWNJ (نیم‌فاصله, U+200C)** is mandatory: می‌شود، نمایه‌ها، به‌ازای، نیم‌فاصله.
+- **Persian characters only**: ی U+06CC, ک U+06A9 — never ي or ك. Never ٤٥٦.
+- **Persian digits in prose** (۱۲۳۴۵۶۷۸۹، «۴۵ دقیقه»، «۲۰ درصد»); **Latin digits inside code
+  and output blocks**.
+- **Punctuation**: ، ؛ ؟ and «گیومه». No em dashes anywhere in Persian prose.
+- **No AI tells:** no «در دنیای امروز», no «نقش بسزایی», no rule-of-three triads, no
+  «در نهایت می‌توان گفت», no tacked-on «که نشان‌دهنده‌ی ... است».
+- Keep headings **level-for-level** identical to the English source so the two documents can be
+  diffed and cross-linked.
+
+### Editor pass (mandatory, after the mechanical translation)
+
+A straight translation is a draft, not a deliverable. For each translated file:
+
+1. Read it **as a Persian editor**, not as a translator. Fix awkward calques of English syntax,
+   sentences that read like English word order, and anything a Persian reader would stumble on.
+2. Make it sound like a teacher who wrote it in Persian the first time, while keeping every
+   technical claim and every number exactly as in the English source.
+3. Vary sentence length and structure. Uniform 15–20-word sentences are the clearest tell.
+4. Run the skill's checkers on each file, from the repo root:
+   ```
+   python "C:\Users\Darya-PC\.agents\skills\persian-writing\scripts\persian_cleanup.py" --edit --in <file> --out <file>
+   python "C:\Users\Darya-PC\.agents\skills\persian-writing\scripts\fa_lint.py" --check <file>
+   ```
+   Fix what the linter reports, and fix by hand what needs judgment (dashes, register, هکسره).
+5. Confirm the code blocks came through unchanged: the translated file must contain the same
+   fenced blocks as the English one.
 
 ## Definition of done (per session, all must hold)
 
