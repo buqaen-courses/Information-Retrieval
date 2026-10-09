@@ -1,0 +1,3 @@
+topic: cooking
+Bread and sauce make a simple dinner.
+The bread soaks up the sauce.

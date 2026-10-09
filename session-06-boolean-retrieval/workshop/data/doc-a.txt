@@ -1,0 +1,3 @@
+topic: python
+Python builds an inverted index term by term.
+A search query reads the postings lists.

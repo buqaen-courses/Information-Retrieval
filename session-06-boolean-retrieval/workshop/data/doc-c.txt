@@ -1,0 +1,3 @@
+topic: search
+An inverted index answers a search query instantly.
+Python powers most search tools.
