@@ -1,0 +1,9 @@
+# Mock Shop — crawl policy for the IR course.
+# Sessions 17-19 read this file and honour it exactly.
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart/
+
+# Politeness: one request at a time, at most 1 per second.
+Crawl-delay: 1
