@@ -84,6 +84,8 @@ def search(model, query: str, catalogue: list[str], top_k: int = 5
     Every catalogue vector already has length 1, so `query_vector @ matrix.T`
     gives the cosine similarity directly — no division, no loop.
     """
+    if not catalogue:
+        return []
     matrix = embed(model, catalogue)
     query_vector = embed(model, [query])[0]
     scores = matrix @ query_vector
