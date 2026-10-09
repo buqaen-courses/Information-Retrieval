@@ -1,0 +1,86 @@
+[
+  {
+    "id": "p-001",
+    "name": "Desk Lamp",
+    "price": "19.99",
+    "category": "lighting",
+    "description": "Warm LED desk lamp, brushed steel, 3-year warranty"
+  },
+  {
+    "id": "p-002",
+    "name": "Office Chair",
+    "price": "249.00",
+    "category": "furniture",
+    "description": "Ergonomic mesh chair with lumbar support and 5 casters"
+  },
+  {
+    "id": "p-003",
+    "name": "USB-C Cable",
+    "price": "8.50",
+    "category": "electronics",
+    "description": "Braided 2m USB-C cable, 100W charging, fits any port"
+  },
+  {
+    "id": "p-004",
+    "name": "Standing Desk Mat",
+    "price": "45.00",
+    "category": "furniture",
+    "description": "Anti-fatigue standing desk mat, 90x50cm"
+  },
+  {
+    "id": "p-005",
+    "name": "Ceramic Mug",
+    "price": "6.75",
+    "category": "kitchen",
+    "description": "Stoneware mug, 350ml, dishwasher safe"
+  },
+  {
+    "id": "p-006",
+    "name": "Monitor Arm",
+    "price": "89.99",
+    "category": "electronics",
+    "description": "Single monitor arm, holds up to 27 inches, VESA"
+  },
+  {
+    "id": "p-007",
+    "name": "Bookshelf",
+    "price": "129.00",
+    "category": "furniture",
+    "description": "Five-shelf birch bookshelf, 180cm tall"
+  },
+  {
+    "id": "p-008",
+    "name": "Wireless Mouse",
+    "price": "34.99",
+    "category": "electronics",
+    "description": "Silent-click wireless mouse, USB-C rechargeable"
+  },
+  {
+    "id": "p-009",
+    "name": "Desk Organizer",
+    "price": "15.00",
+    "category": "office",
+    "description": "Walnut desk organizer with pen tray and card slots"
+  },
+  {
+    "id": "p-010",
+    "name": "Table Lamp",
+    "price": "39.99",
+    "category": "lighting",
+    "description": "Adjustable brass table lamp with warm white bulb"
+  },
+  {
+    "id": "p-011",
+    "name": "Notebook A5",
+    "price": "7.25",
+    "category": "office",
+    "description": "Dot-grid A5 notebook, 192 pages, lies flat"
+  },
+  {
+    "id": "p-012",
+    "name": "Cable, 3-pack",
+    "price": "11.00",
+    "category": "electronics",
+    "description": "Three braided cables, 1m each, mixed lengths, spare"
+  }
+]

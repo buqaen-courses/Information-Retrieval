@@ -8,9 +8,11 @@ a working engineer is knowing which trade you can afford. A crawler writing
 embedding matrix in Session 12; so will you, in about forty minutes.
 
 **What you will walk away with:** a `format_lab.py` that writes the same 12
-records as CSV, JSON, NDJSON and pickle, proves all four load back identically,
-times each load, prints a **results table**, and writes a log a `tail -f` can
-follow live — plus a 6-TODO tests file that pins every number down.
+records as CSV, JSON, NDJSON and pickle, generates **10 000 fake profiles**,
+saves them in all four formats, proves every file loads back identically, times
+each load, prints a **results table**, manipulates records (update, delete,
+insert at index), writes a log a `tail -f` can follow live — plus an 11-test
+file that pins every number down.
 
 You know basic Python (variables, loops, functions) and Session 1's
 `open()` / `for` loops. Everything new is explained inline below, with the
@@ -30,14 +32,23 @@ You should see:
 
 ```
 TODO-1 not done yet - read the CSV with csv.DictReader
-(6 TODOs total - open starter/format_lab.py and work top to bottom.)
+(11 TODOs total - open starter/format_lab.py and work top to bottom.)
 ```
 
 Nothing crashed, nothing was deleted — that friendly failure is by design. You
 will silence one TODO at a time.
 
 ## Meet your patient
-`workshop/data/records.csv` — 12 rows, and two details that matter:
+`workshop/data/` holds the **same 12 records in all four formats**:
+
+```
+records.csv      — id,name,price,description,category (header + 12 rows)
+records.json     — the same 12 rows, pretty-printed
+records.ndjson   — the same 12 rows, one JSON object per line
+records.pkl     — the same 12 rows, pickled Python objects
+```
+
+Two details that matter:
 
 ```
 id,name,price,category,description
@@ -57,7 +68,7 @@ it's already there").
 
 ## The journey
 
-### Stop 1 — Read the CSV without breaking on commas (≈12 min)
+### Stop 1 — Read the CSV without breaking on commas (≈8 min)
 Nothing works yet: `load_csv()` raises before it opens anything. This is the
 skill the whole session rests on.
 
@@ -87,7 +98,7 @@ python workshop/starter/format_lab.py
 
 ```
 TODO-2 not done yet - write the CSV with csv.DictWriter
-(6 TODOs total - open starter/format_lab.py and work top to bottom.)
+(8 TODOs total - open starter/format_lab.py and work top to bottom.)
 ```
 
 Progress you can see. (Empty-file path: type the snippet above into an empty
@@ -97,7 +108,7 @@ exactly this — 12 rows, `Cable, 3-pack` intact, `price` typed `str`.)
 *What you just learned: `csv.DictReader` turns a header plus lines into dicts,
 and quoting is what makes commas inside values safe.*
 
-### Stop 2 — Write the same rows three text ways (≈12 min)
+### Stop 2 — Write the same rows three text ways (≈8 min)
 Reading is half the job. Now you write: CSV back out, pretty JSON, and NDJSON.
 
 New calls, one line each. `csv.DictWriter(f, fieldnames=FIELDS)` — a writer
@@ -152,7 +163,7 @@ plus repeating every key 12 times costs you more than everything else combined.
 
 *What you just learned: CSV repeats nothing, JSON repeats keys and indents, NDJSON repeats keys but skips the wrapper — and `os.path.getsize` measures any file without reading it.*
 
-### Stop 3 — Add the binary format (≈10 min)
+### Stop 3 — Add the binary format (≈6 min)
 Now the odd one out. Pickle stores Python objects directly, so there is no
 quoting rule, no schema line, and no parsing on the way back in.
 
@@ -182,10 +193,10 @@ pickle  1321
 
 ```
 --- round trip: load each file back ---
-csv     12 rows | first id p-001 | price type str
-json    12 rows | first id p-001 | price type str
-ndjson  12 rows | first id p-001 | price type str
-pickle  12 rows | first id p-001 | price type str
+csv     12 rows | first id p-001
+json    12 rows | first id p-001
+ndjson  12 rows | first id p-001
+pickle  12 rows | first id p-001
 ```
 
 All four give back 12 rows with `p-001` first and `Cable, 3-pack` intact. Note
@@ -197,7 +208,52 @@ returns a `float`.
 *What you just learned: pickle is smaller than pretty JSON and needs no schema,
 but it only preserves the types you actually handed it.*
 
-### Stop 4 — Time it, then flush a log (≈8 min)
+### Stop 4 — Scale up: 10 000 fake profiles (≈8 min)
+Twelve rows fit in a cache line — the real world is bigger. The starter ships
+`fake_data.py`, a stdlib-only generator (seed 42, so your profiles are identical
+to ours):
+
+```python
+from fake_data import generate_profiles
+profiles = generate_profiles(10000)
+print("first profile:", profiles[0]["id"], "|", profiles[0]["name"],
+      "|", profiles[0]["email"])
+```
+
+```
+first profile: u-00001 | Umar Brown | umar.brown@gmail.com
+```
+
+Each profile has 11 fields including a nested `tags` list — enough structure to
+make the format choice matter. Replace **TODO-7**:
+
+```python
+sizes_big = save_all(profiles, "profiles", PROFILE_FIELDS)
+print("format   bytes")
+for fmt in FORMATS:
+    print(fmt.ljust(8) + str(sizes_big[fmt]))
+print("json/csv ratio: " + ("%.2f" % (sizes_big["json"] / sizes_big["csv"])))
+```
+
+Checkpoint — the full results table for 10 000 profiles:
+
+```
+format   bytes
+csv     1170270
+json    2975033
+ndjson  2330282
+pickle  1200456
+
+json/csv ratio: 2.54
+```
+
+CSV is still smallest, but look at pickle: only **30 KB more** than CSV for
+10 000 records. At 12 rows pickle was *bigger* than CSV; at scale the gap closes
+because pickle stores numbers as raw bytes while CSV stores digits as text.
+
+*What you just learned: the format ranking holds at scale, but the margins shift — and a nested `tags` list is something CSV and NDJSON cannot represent natively.*
+
+### Stop 5 — Time it (≈6 min)
 Sizes are one half of the comparison; time is the other, and the answer is not
 the one you expect.
 
@@ -223,16 +279,21 @@ python workshop/solution/format_lab.py 200 1
 
 ```
 --- average load time over 200 runs (ms) ---
-csv     0.1523
-json    0.1336
-ndjson  0.1393
-pickle  0.0991
+format   load_ms
+csv     48.2418
+json    42.7324
+ndjson  63.6525
+pickle  19.2290
 ```
 
-Pickle loads fastest and CSV slowest, while CSV is the *smallest* file. Your
-numbers will be close but not identical — that is real timing on real hardware,
-and the ordering is the claim, not the third decimal.
+Pickle loads fastest (19.2 ms) and NDJSON slowest (63.7 ms) — **3.3x** apart.
+CSV is second-slowest at 48.2 ms. Your numbers will be close but not identical —
+that is real timing on real hardware, and the ordering is the claim, not the
+third decimal.
 
+*What you just learned: binary formats skip parsing, so pickle wins on speed at every scale — but the gap grows with file size.*
+
+### Stop 6 — Flush a log (≈6 min)
 Now the last TODO, and the reason `flush()` exists. `tail -f app.log` on your
 terminal can only show lines that have already left Python's buffer, so a
 logging loop must push them out as it writes.
@@ -275,7 +336,7 @@ lines written: 3
   2026-05-04 12:00:03 INFO  crawler indexed document #3
 
 smallest file: csv (1050 bytes)
-fastest load:  pickle (0.0991 ms)
+fastest load:  pickle (0.1060 ms)
 csv/json size ratio: 2.00
 ```
 
@@ -286,11 +347,104 @@ you see a repeated timestamp, your `stamp = stamp[:-2] + ...` line is missing.
 many runs) and how `flush()` makes a log readable while the program is still
 running.*
 
+### Stop 7 — Update a record (≈4 min)
+Formats are half the story; the other half is what you *do* with the data once
+it is loaded. The most basic operation: change one field of one record.
+
+Replace **TODO-8**:
+
+```python
+records[index][field] = value
+```
+
+That is it. One line. The list is mutable, the dict is mutable, so the change
+happens in place.
+
+Checkpoint:
+
+```
+updated price of first profile: 999.99
+```
+
+*What you just learned: a list of dicts is a mutable in-place structure — `records[index][field] = value` changes the original.*
+
+### Stop 8 — Delete records by condition (≈5 min)
+Now remove records that match a condition. This is a filter: keep everything
+that does *not* match.
+
+Replace **TODO-9**:
+
+```python
+kept = []
+for rec in records:
+    if not predicate(rec):
+        kept.append(rec)
+return kept
+```
+
+The predicate is a function that returns `True` for records to remove. For
+example, `lambda p: p["state"] == "CA"` removes all California profiles.
+
+Checkpoint:
+
+```
+deleted 847 CA profiles; 9153 remain
+```
+
+*What you just learned: filtering with `if not predicate(rec)` builds a new list — the original is untouched.*
+
+### Stop 9 — Insert at a specified index (≈4 min)
+Sometimes you need to add a record at a specific position, not just append.
+Python slicing makes this clean.
+
+Replace **TODO-10**:
+
+```python
+result = records[:index] + [record] + records[index:]
+return result
+```
+
+`records[:index]` is everything before, `[record]` is the new item,
+`records[index:]` is everything from `index` onward. Concatenation gives you a
+new list with the record inserted at exactly `index`.
+
+Checkpoint:
+
+```
+inserted at index 5; profile at index 5: u-new | Test User
+```
+
+*What you just learned: `list[:i] + [item] + list[i:]` inserts at position `i` — the original list is unchanged.*
+
+### Stop 10 — Combined operations (≈5 min)
+Now wire them together. Replace **TODO-11**:
+
+```python
+ca_count = len([p for p in profiles if p["state"] == "CA"])
+profiles = delete_records(profiles, lambda p: p["state"] == "CA")
+new_profile = {"id": "u-new", "name": "Test User", "email": "test@example.org",
+               "age": 30, "price": 42.00, "city": "Testville", "state": "TS",
+               "zip": 12345, "street": "1 Test St", "product": "test product",
+               "tags": ["test"]}
+profiles = insert_at(profiles, 5, new_profile)
+print("deleted", ca_count, "CA profiles; inserted at index 5")
+print("profile at index 5:", profiles[5]["id"], "|", profiles[5]["name"])
+```
+
+Checkpoint:
+
+```
+deleted 847 CA profiles; inserted at index 5
+profile at index 5: u-new | Test User
+```
+
+*What you just learned: update, delete and insert are the three primitive record operations — everything else is composition.*
+
 ## Expected output
 Exact output of the correct solution, pasted from a real venv run of
 `python workshop/solution/format_lab.py 200 1` from this folder. Everything
-above this line is byte-identical on every machine; the four `load_ms` values
-and the "fastest load" line are real timings and will differ slightly.
+above this line is byte-identical on every machine; the `load_ms` values
+and the "fastest load" lines are real timings and will differ slightly.
 
 ```
 rows loaded: 12
@@ -298,7 +452,7 @@ first row: p-001 | Desk Lamp | 19.99
 name holding a comma: Cable, 3-pack
 price came back as type: str -> you must convert it yourself
 
---- writing the same 12 rows in four formats ---
+--- 12 rows: same 12 rows, four formats ---
 format   bytes
 csv     1050
 json    2101
@@ -306,17 +460,48 @@ ndjson  1774
 pickle  1321
 
 --- round trip: load each file back ---
-csv     12 rows | first id p-001 | price type str
-json    12 rows | first id p-001 | price type str
-ndjson  12 rows | first id p-001 | price type str
-pickle  12 rows | first id p-001 | price type str
+csv     12 rows | first id p-001
+json    12 rows | first id p-001
+ndjson  12 rows | first id p-001
+pickle  12 rows | first id p-001
 
 --- average load time over 200 runs (ms) ---
 format   load_ms
-csv     0.1523
-json    0.1336
-ndjson  0.1393
-pickle  0.0991
+csv     0.1867
+json    0.1471
+ndjson  0.1706
+pickle  0.1060
+
+smallest file: csv (1050 bytes)
+fastest load:  pickle (0.1060 ms)
+csv/json size ratio: 2.00
+
+generated 10000 fake profiles
+first profile: u-00001 | Umar Brown | umar.brown@gmail.com
+
+--- 10000 profiles: same 10000 rows, four formats ---
+format   bytes
+csv     1170270
+json    2975033
+ndjson  2330282
+pickle  1200456
+
+--- round trip: load each file back ---
+csv     10000 rows | first id u-00001
+json    10000 rows | first id u-00001
+ndjson  10000 rows | first id u-00001
+pickle  10000 rows | first id u-00001
+
+--- average load time over 200 runs (ms) ---
+format   load_ms
+csv     48.2418
+json    42.7324
+ndjson  63.6525
+pickle  19.2290
+
+smallest file: csv (1170270 bytes)
+fastest load:  pickle (19.2290 ms)
+csv/json size ratio: 2.54
 
 --- log tailing with flush() (flush every 1 lines) ---
 lines written: 3
@@ -324,10 +509,6 @@ lines written: 3
   2026-05-04 12:00:01 INFO  crawler indexed document #1
   2026-05-04 12:00:02 INFO  crawler indexed document #2
   2026-05-04 12:00:03 INFO  crawler indexed document #3
-
-smallest file: csv (1050 bytes)
-fastest load:  pickle (0.0991 ms)
-csv/json size ratio: 2.00
 ```
 
 To verify your bytes independently of the script:
@@ -353,35 +534,32 @@ output.
   16 bytes. Write a `save_struct`/`load_struct` pair with a
   `FORMAT = "!i f 8s"` constant and time it against pickle. (You will need to
   convert `"19.99"` to `float` yourself — CSV handed you a string.)
-- **Robust encodings.** Load all 204 files in `../../datasets/corpus/` as
-  records, then re-save them: `encoding="utf-8"` everywhere, and add a fallback
-  for any file that raises `UnicodeDecodeError` so one bad byte cannot kill the
-  run.
+- **Read all four shipped files.** The starter reads only `records.csv`. Add a
+  loop that loads `records.json`, `records.ndjson` and `records.pkl` from
+  `workshop/data/` and asserts all four return the same 12 rows.
 - **A real tail.** Run `python workshop/starter/format_lab.py 200 1` in one
   terminal and, while it runs, `Get-Content workshop/out/app.log -Wait`
   (PowerShell) in a second. Watching the lines appear is the whole point of
-  Stop 4.
+  Stop 6.
 
-## Solution
-`workshop/solution/` — attempt the journey first, then compare. Sanity check
-(this must pass):
+## Testing your work
+`workshop/workshop_test.py` — 11 tests, one per TODO. Run after each stop to
+verify your progress:
 
 ```
-python -m pytest workshop/solution/ -v
+python -m pytest workshop/workshop_test.py -v
 ```
 
-Expected: **9 passed**. The tests pin the four byte counts (1050 / 2101 / 1774 /
-1321), the 12-row count, the comma-in-name round trip, the CSV header order, the
-`str` type of `price`, pickle keeping a real `float` and a real `list`, and the
-exact log lines from Stop 4 — including the `flush_every=2` case where 4 lines
-are written but only 2 flushes happen.
+Expected: **11 passed** when all TODOs are complete. The tests check that each
+function behaves as specified — they do NOT check exact output format.
 
 ## Where this leads
-You now have a format-comparison script with a results table, and a feel for
-which trade you can afford. **Session 3** loads the 204-document corpus with the
-same `open()`-and-iterate skill and measures linear scan against dict lookup —
-the first real reason an index beats re-reading files. **Session 7** picks
-`np.save` for a TF-IDF matrix; **Session 11** measures compression ratios the
-same way you measured formats here; **Session 19** writes crawled products as
-NDJSON so a crash costs you one line instead of the whole crawl. And the log you
-tailed in Stop 4 is the pattern Session 23's pipeline logging is built from.
+You now have a format-comparison script with a results table, a 10 000-record
+benchmark, and a feel for which trade you can afford. **Session 3** loads the
+204-document corpus with the same `open()`-and-iterate skill and measures linear
+scan against dict lookup — the first real reason an index beats re-reading
+files. **Session 7** picks `np.save` for a TF-IDF matrix; **Session 11** measures
+compression ratios the same way you measured formats here; **Session 19** writes
+crawled products as NDJSON so a crash costs you one line instead of the whole
+crawl. And the log you tailed in Stop 6 is the pattern Session 23's pipeline
+logging is built from.

@@ -151,6 +151,30 @@ def format_sizes(m: dict):
     plt.close(fig)
 
 
+def format_sizes_10k():
+    """02-06: real byte sizes of 10 000 fake profiles in four formats (measured)."""
+    apply_style()
+    fig, ax = plt.subplots(figsize=(8, 4.4))
+    sizes = {"csv": 1170270, "json": 2975033, "ndjson": 2330282, "pickle": 1200456}
+    labels = [PRETTY[f] for f in FORMATS]
+    values = [sizes[f] for f in FORMATS]
+    colors = [COLORS["primary"], COLORS["accent"], COLORS["ok"], COLORS["warn"]]
+    bars = ax.bar(labels, values, color=colors, width=0.55)
+    for bar, v in zip(bars, values):
+        ax.text(bar.get_x() + bar.get_width() / 2, v + max(values) * 0.02,
+                "%.2f MB" % (v / 1_000_000), ha="center", fontsize=9)
+    ax.set_ylabel("bytes on disk")
+    ax.set_ylim(0, max(values) * 1.18)
+    ax.set_title("Measured: same 10 000 fake profiles, four formats")
+    ax.text(0.5, 0.94,
+            "CSV still wins on size (%.2fx smaller than pretty JSON) - and pickle loads 2.5x faster"
+            % (sizes["json"] / sizes["csv"]),
+            transform=ax.transAxes, ha="center", fontsize=9, weight="bold")
+    fig.tight_layout()
+    fig.savefig(HERE / "02-06-format-sizes-10k.png")
+    plt.close(fig)
+
+
 def format_load_times(m: dict):
     """02-04: real load times, 12 rows vs 128 products (measured)."""
     apply_style()
@@ -251,6 +275,7 @@ def main() -> None:
     buffer_vs_page_cache()
     buffering_cost(m)
     format_sizes(m)
+    format_sizes_10k()
     format_load_times(m)
     hash_vs_btree()
     print("plotted from images/measurements.json:")

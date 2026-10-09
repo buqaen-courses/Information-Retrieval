@@ -2,7 +2,8 @@
 > Session 1 read text line by line. Today we choose a *file format*, watch where bytes wait, and learn why a dict lookup and a B-tree walk are different animals.
 
 ## What you'll learn
-- Text formats (CSV / JSON / NDJSON) vs binary ones (pickle, `struct`, `np.save`) — and when each one wins
+- What **serialization** is, why every data pipeline depends on it, and how pickle, JSON, CSV and NDJSON each answer it differently
+- Text formats (CSV / JSON / NDJSON) vs binary ones (pickle) — with real measured sizes on 12 rows **and** 10 000 fake profiles
 - Why CSV is the *smallest* of the four here while pickle is the *fastest*, with real measured numbers
 - Two places bytes sit before they touch a disk: Python's buffer and the OS **page cache**
 - What `flush()` actually does, what `fsync()` adds, and what a **file descriptor** is
@@ -10,19 +11,38 @@
 
 ## Concepts
 
-### 02.1 Text formats: CSV, JSON, NDJSON
-![Real byte sizes of the same 12 rows saved as CSV, JSON, NDJSON and pickle](images/02-03-format-sizes-12rows.png)
+### 02.1 Serialization: turning objects into bytes and back
+![Measured file sizes: same 12 rows and same 10 000 profiles in four formats](images/02-03-format-sizes-12rows.png)
+**Serialization** is the process of converting a live Python object (a list of
+dicts, a tree, a number) into a sequence of **bytes** that can be stored in a
+file or sent across a network — and **deserialization** is the reverse trip.
+Every time you save a model, write a crawl checkpoint, or ship a record from
+one service to another, you serialize. The format you pick decides three
+things: how *small* the bytes are, how *fast* they load back, and whether
+*other tools* can read them. Analogy: serialization is **packing a suitcase** —
+you can fold everything flat (CSV), use the original hangers (pickle), or
+write a manifest so strangers can repackage it (JSON). Key terms:
+**serialization**, **deserialization**, **format**, **round trip**.
+
+Three families you will meet in this course: **self-describing** formats
+(JSON, CSV — the file carries its own schema, so any tool can read it),
+**language-bound** formats (pickle — only Python understands it, but it keeps
+your exact types), and **columnar** formats (Parquet, numpy `.npy` — optimised
+for matrices and analytics, met again in Sessions 7 and 12).
+
+### 02.2 Text formats: CSV, JSON, NDJSON
+![Measured: 10 000 profiles — CSV 1.17 MB, pickle 1.20 MB, NDJSON 2.33 MB, JSON 2.98 MB](images/02-06-format-sizes-10k.png)
 A **format** is just the agreement about which bytes mean what. Three text
 formats you will meet across this course: **CSV** — one row per line, values
 separated by commas, `"` around anything holding a comma; **JSON** — nested
 `{ }` / `[ ]` with `"key": value` pairs; **NDJSON** — the same objects but one
 per line, no wrapping array, so you can read a billion-row file without loading
-it. The chart is measured on the 12 workshop rows you will use in the workshop:
-CSV 1050 B, NDJSON 1774 B, JSON 2101 B. CSV wins because it repeats nothing —
-NDJSON repeats every key on every line, and pretty JSON adds `indent=2` newlines
-and spaces. Analogy: a **table** (CSV), a **catalogue card** (JSON), and a
-**receipt roll** (NDJSON) — same facts, different paper. Key terms:
-**CSV**, **JSON**, **NDJSON**, **serialization**.
+it. The chart is measured on the 10 000 fake profiles you generate in the
+workshop: CSV 1 170 270 B, pickle 1 200 456 B, NDJSON 2 330 282 B, JSON
+2 975 033 B. CSV wins because it repeats nothing — NDJSON repeats every key on
+every line, and pretty JSON adds `indent=2` newlines and spaces. Analogy: a
+**table** (CSV), a **catalogue card** (JSON), and a **receipt roll** (NDJSON) —
+same facts, different paper. Key terms: **CSV**, **JSON**, **NDJSON**, **serialization**.
 
 New calls, one line each. `csv.DictReader(f)` walks a CSV and hands you one
 `dict` per row, keyed by the header line. `csv.DictWriter(f, fieldnames=...)`
@@ -37,7 +57,7 @@ One honest CSV caveat, visible in the chart: **CSV has no types**. `19.99` comes
 back as the *string* `"19.99"`, so you convert it yourself. JSON preserves
 `int` / `float` / `list`, and pickle preserves everything Python knows.
 
-### 02.2 Binary formats: pickle, struct, np.save
+### 02.3 Binary formats: pickle, struct, np.save
 ![Measured median load time for 12 rows and for 128 products, per format](images/02-04-format-load-times.png)
 A **binary format** stores numbers as raw bytes instead of as digits in text, so
 loading it skips all the parsing. Three you will meet: **pickle** — Python's own
@@ -64,7 +84,7 @@ it**. Pickle of a class instance fails if the class moved; `struct` layout fails
 if you reorder the format string. Text files survive that. Never open a pickle
 from a stranger — `pickle.load` can run code.
 
-### 02.3 Where bytes wait: Python's buffer vs the page cache
+### 02.4 Where bytes wait: Python's buffer vs the page cache
 ![Diagram of your code, Python's 8 KB buffer, the kernel page cache, and the disk](images/02-01-buffer-vs-page-cache.png)
 When you call `f.write("hello")`, the bytes do **not** go to the disk. They land
 in Python's own **buffer** — a few kilobytes of RAM sitting next to your object —
@@ -83,7 +103,7 @@ in **bytes** with no reading at all — it just asks the OS about the file's
 metadata. `os.makedirs(path, exist_ok=True)` creates a directory (and does
 nothing if it is already there) so your writes have somewhere to land.
 
-### 02.4 flush(), fsync(), and the file descriptor
+### 02.5 flush(), fsync(), and the file descriptor
 ![Measured cost of 2000 small writes, buffered versus unbuffered](images/02-02-buffering-cost.png)
 `flush()` means one specific thing: **push Python's buffer into the OS**. It
 does not touch the disk. `os.fsync(f.fileno())` is the one that asks the disk to
@@ -108,7 +128,7 @@ Real use for `flush()`, which the workshop builds: **log tailing**. `tail -f app
 can only show lines that have already left Python's buffer, so a logging loop
 must `flush()` as it writes instead of waiting for `close()`.
 
-### 02.5 Sidebar: hash index vs B-tree
+### 02.6 Sidebar: hash index vs B-tree
 ![Side-by-side diagram: hash lookup in one hop versus a sorted B-tree walk for a range query](images/02-05-hash-vs-btree.png)
 Two ways to find one key in a pile of keys, and they are good at different
 things. A **hash index** runs the key through a hash function, gets a bucket
@@ -176,9 +196,10 @@ standard library — `csv`, `json`, `pickle`, `struct`, `os`, `time` — plus
 ## How this connects to the workshop
 The README showed you the four formats side by side; the workshop makes you pay
 for the comparison. Stop 1 reads `records.csv` safely, Stops 2 and 3 write the
-same 12 rows as CSV, JSON, NDJSON and pickle, Stop 4 times the loads and prints
-the results table, and Stop 5 uses `flush()` for real by writing a log a tailer
-can follow. Every number you produce is yours to check against the chart above.
+same 12 rows as CSV, JSON, NDJSON and pickle, Stop 4 adds 10 000 fake profiles
+and compares their sizes, Stop 5 times the loads and prints the results table,
+and Stop 6 uses `flush()` for real by writing a log a tailer can follow. Every
+number you produce is yours to check against the chart above.
 
 ## Common pitfalls
 - `open(path, mode="w")` for `pickle` — pickle needs `mode="wb"`, or you get `TypeError: a bytes-like object is required`.
@@ -189,20 +210,20 @@ can follow. Every number you produce is yours to check against the chart above.
 - `pickle.load()` on a file from someone else — unpickling can execute code. Only unpickle files you wrote.
 
 ## Self-check quiz
-1. On this machine's 12-row measurement, which format produced the smallest file, and which loaded fastest?
-2. What does `flush()` actually do — and what does it *not* do?
-3. You write `pickle.dump(rows, f)` to a file opened with `mode="w"`. What happens and why?
-4. Why does a hash index answer "find doc-042" better than a B-tree, while a B-tree answers "price between 50 and 80" better?
-5. What comes back after a CSV round trip for the value `19.99`, and what is the one-line fix?
+1. What does "serialization" mean, and what three things does your choice of format decide?
+2. On this machine's 12-row measurement, which format produced the smallest file, and which loaded fastest?
+3. What does `flush()` actually do — and what does it *not* do?
+4. You write `pickle.dump(rows, f)` to a file opened with `mode="w"`. What happens and why?
+5. Why does a hash index answer "find doc-042" better than a B-tree, while a B-tree answers "price between 50 and 80" better?
 
 <details>
 <summary>Answers</summary>
 
-1. Smallest: **CSV, 1050 bytes**. Fastest: **pickle** (median 0.14 ms on 12 rows, 0.21 ms on 128 products, versus 0.77 ms for CSV).
-2. It pushes Python's buffer into the OS page cache. It does **not** force the data onto the disk — that is `os.fsync()`.
-3. It fails with `TypeError: a bytes-like object is required` (not `'str'`), because pickle writes `bytes` and text mode only accepts `str`. Open with `mode="wb"`.
-4. Hash jumps straight to one computed bucket (O(1)) but stores keys in no order, so a range means scanning every bucket. A B-tree keeps keys sorted, so a range is a short ordered walk that can stop early.
-5. The **string** `"19.99"` — CSV is untyped text. Fix: `float(rows[0]["price"])`, or use JSON/pickle if you want types back.
+1. Serialization converts a live Python object into bytes for storage or transport; deserialization reverses it. The format decides size, load speed, and whether other tools can read it.
+2. Smallest: **CSV, 1050 bytes**. Fastest: **pickle** (median 0.14 ms on 12 rows, 0.21 ms on 128 products, versus 0.77 ms for CSV).
+3. It pushes Python's buffer into the OS page cache. It does **not** force the data onto the disk — that is `os.fsync()`.
+4. It fails with `TypeError: a bytes-like object is required` (not `'str'`), because pickle writes `bytes` and text mode only accepts `str`. Open with `mode="wb"`.
+5. Hash jumps straight to one computed bucket (O(1)) but stores keys in no order, so a range means scanning every bucket. A B-tree keeps keys sorted, so a range is a short ordered walk that can stop early.
 </details>
 
 ## Next
