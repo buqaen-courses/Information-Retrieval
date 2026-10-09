@@ -10,6 +10,14 @@ end-to-end demo + capstone.
 **Pedagogical rule:** teach, then practice — never mix. Read the session `README.md` first
 (visuals + tiny worked example), then open `workshop/WORKSHOP.md` and code.
 
+## Start here: the intro deck
+
+Open [`Intro.html`](Intro.html) in your browser (double-click it) — a 30-slide
+tour of the whole course: why search matters, the pipeline every engine shares,
+and a one-slide preview of each major idea (inverted index → BM25 → metrics →
+embeddings → hybrid + reranking). Navigate with → / ← keys or mouse clicks.
+Watch it before Session 1; revisit it before the capstone (Session 25).
+
 ## Environment setup (do once)
 
 ```powershell

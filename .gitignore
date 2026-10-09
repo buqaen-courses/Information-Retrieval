@@ -1,4 +1,19 @@
+# Virtualenv / Python environment
 .venv/
+venv/
+env/
+
+# Python caches
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Local secrets and env overrides
+.env

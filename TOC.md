@@ -32,6 +32,7 @@
 
 ## Supporting material
 
+- [Intro.html](Intro.html) — 30-slide course intro deck (start here)
 - [SYLLABUS.md](SYLLABUS.md) — source of truth for session content
 - [AGENTS.md](AGENTS.md) — generation contract (templates, image/code rules, validation)
 - `setup/` — Session-0 prework (env check, model pre-cache, OpenSearch Docker, mock shop)
